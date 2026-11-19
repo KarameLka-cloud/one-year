@@ -4,16 +4,15 @@ import { query } from '../db.js';
 const router = Router();
 
 const STATUSES = new Set(['new', 'processed']);
-const ATTENDANCE_LABELS = { yes: 'Придёт', no: 'Не придёт', maybe: 'Пока не уверен(а)' };
+const ATTENDANCE_LABELS = { yes: 'Придёт', no: 'Не придёт' };
 
 function toRecord(row) {
   return {
     id: row.id,
     name: row.name,
-    contact: row.contact,
+    pair: row.pair || '',
     attendance: row.attendance,
-    guests: Number(row.guests),
-    message: row.message || '',
+    children: Number(row.children),
     status: row.status,
     createdAt: row.created_at_unix
       ? new Date(Number(row.created_at_unix) * 1000).toISOString()
@@ -25,20 +24,29 @@ async function getStats() {
   const rows = await query(
     `SELECT
        COUNT(*) AS total,
-       COALESCE(SUM(attendance = 'yes'), 0) AS coming,
+       COUNT(*) + SUM(pair IS NOT NULL) AS totalAdults,
+       COALESCE(SUM(children), 0) AS totalChildren,
+       COUNT(*) + SUM(pair IS NOT NULL) + COALESCE(SUM(children), 0) AS totalPeople,
+       COALESCE(SUM(CASE WHEN attendance = 'yes' THEN 1 ELSE 0 END), 0)
+         + COALESCE(SUM(CASE WHEN attendance = 'yes' THEN pair IS NOT NULL ELSE 0 END), 0) AS comingAdults,
+       COALESCE(SUM(CASE WHEN attendance = 'yes' THEN children ELSE 0 END), 0) AS comingChildren,
+       COALESCE(SUM(CASE WHEN attendance = 'yes' THEN 1 ELSE 0 END), 0)
+         + COALESCE(SUM(CASE WHEN attendance = 'yes' THEN pair IS NOT NULL ELSE 0 END), 0)
+         + COALESCE(SUM(CASE WHEN attendance = 'yes' THEN children ELSE 0 END), 0) AS comingTotal,
        COALESCE(SUM(attendance = 'no'), 0) AS notComing,
-       COALESCE(SUM(attendance = 'maybe'), 0) AS maybe,
-       COALESCE(SUM(CASE WHEN attendance IN ('yes', 'maybe') THEN guests ELSE 0 END), 0) AS guests,
        COALESCE(SUM(status = 'new'), 0) AS unread
      FROM rsvps`,
   );
   const row = rows[0] || {};
   return {
     total: Number(row.total || 0),
-    coming: Number(row.coming || 0),
+    totalAdults: Number(row.totalAdults || 0),
+    totalChildren: Number(row.totalChildren || 0),
+    totalPeople: Number(row.totalPeople || 0),
+    comingAdults: Number(row.comingAdults || 0),
+    comingChildren: Number(row.comingChildren || 0),
+    comingTotal: Number(row.comingTotal || 0),
     notComing: Number(row.notComing || 0),
-    maybe: Number(row.maybe || 0),
-    guests: Number(row.guests || 0),
     unread: Number(row.unread || 0),
   };
 }
@@ -52,9 +60,9 @@ function buildFilters({ status, q }) {
     params.push(status);
   }
   if (q) {
-    where.push('(name LIKE ? OR contact LIKE ? OR message LIKE ?)');
+    where.push('(name LIKE ? OR pair LIKE ?)');
     const like = `%${q}%`;
-    params.push(like, like, like);
+    params.push(like, like);
   }
 
   return {
@@ -75,7 +83,7 @@ router.get('/rsvps', async (req, res, next) => {
 
     const [rows, countRows, stats] = await Promise.all([
       query(
-        `SELECT id, name, contact, attendance, guests, message, status,
+        `SELECT id, name, pair, attendance, children, status,
                 UNIX_TIMESTAMP(created_at) AS created_at_unix
          FROM rsvps
          ${clause}
@@ -106,7 +114,7 @@ router.get('/rsvps/export', async (req, res, next) => {
     const { clause, params } = buildFilters({ status, q });
 
     const rows = await query(
-      `SELECT id, name, contact, attendance, guests, message, status,
+      `SELECT id, name, pair, attendance, children, status,
               UNIX_TIMESTAMP(created_at) AS created_at_unix
        FROM rsvps
        ${clause}
@@ -120,7 +128,7 @@ router.get('/rsvps/export', async (req, res, next) => {
       return `"${text.replace(/"/g, '""')}"`;
     };
 
-    const header = ['ID', 'Дата', 'Имя', 'Контакт', 'Присутствие', 'Гостей', 'Пожелание', 'Статус'];
+    const header = ['ID', 'Дата', 'Имя', 'Пара', 'Присутствие', 'Дети', 'Статус'];
     const lines = rows.map((row) => {
       const date = row.created_at_unix
         ? new Date(Number(row.created_at_unix) * 1000).toLocaleString('ru-RU', {
@@ -132,10 +140,9 @@ router.get('/rsvps/export', async (req, res, next) => {
         row.id,
         date,
         row.name,
-        row.contact,
+        row.pair || '',
         ATTENDANCE_LABELS[row.attendance] || row.attendance,
-        row.guests,
-        row.message || '',
+        row.children,
         row.status === 'new' ? 'Новая' : 'Обработана',
       ].map(escapeCell).join(';');
     });

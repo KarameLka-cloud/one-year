@@ -14,10 +14,9 @@ if (!/^[a-zA-Z0-9_]+$/.test(config.db.database)) {
 }
 
 const demoRecords = [
-  ['Анна Петрова', '+7 (902) 111-22-33', 'yes', 2, 'Очень ждём праздника! Будем с дочкой.'],
-  ['Сергей и Мария', 'max: @sergey_m', 'yes', 2, 'Подарок уже готов 🙂'],
-  ['Ольга Иванова', '+7 (914) 555-66-77', 'maybe', 1, 'Постараюсь быть, уточню ближе к дате.'],
-  ['Дмитрий', 'telegram: @dmitry', 'no', 0, 'К сожалению, не смогу приехать. Поздравляю малышку!'],
+  ['Анна Петрова', 'Сергей и Мария', 'yes', 1],
+  ['Ольга Иванова', '', 'yes', 2],
+  ['Дмитрий', '', 'no', 0],
 ];
 
 async function main() {
@@ -54,8 +53,8 @@ async function main() {
       if (Number(rows[0]?.total || 0) === 0) {
         for (const record of demoRecords) {
           await connection.query(
-            `INSERT INTO rsvps (name, contact, attendance, guests, message)
-             VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO rsvps (name, pair, attendance, children)
+             VALUES (?, ?, ?, ?)`,
             record,
           );
         }

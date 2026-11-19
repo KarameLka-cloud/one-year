@@ -7,7 +7,6 @@ const LIMIT = 10;
 const ATTENDANCE = {
   yes: { label: 'Придёт', className: 'yes' },
   no: { label: 'Не придёт', className: 'no' },
-  maybe: { label: 'Под вопросом', className: 'maybe' },
 };
 
 const dateFormatter = new Intl.DateTimeFormat('ru-RU', {
@@ -24,13 +23,13 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? '—' : dateFormatter.format(date);
 }
 
-function pluralGuests(count) {
+function pluralChildren(count) {
   const abs = Math.abs(count) % 100;
   const last = abs % 10;
-  if (abs > 10 && abs < 20) return 'гостей';
-  if (last === 1) return 'гость';
-  if (last >= 2 && last <= 4) return 'гостя';
-  return 'гостей';
+  if (abs > 10 && abs < 20) return 'детей';
+  if (last === 1) return 'ребёнок';
+  if (last >= 2 && last <= 4) return 'ребёнка';
+  return 'детей';
 }
 
 function SearchIcon() {
@@ -185,7 +184,7 @@ export default function Admin() {
   }, [selected, toDelete]);
 
   const totalPages = Math.max(Math.ceil(total / LIMIT), 1);
-  const currentStats = stats || { total: 0, coming: 0, notComing: 0, maybe: 0, guests: 0, unread: 0 };
+  const currentStats = stats || { total: 0, totalAdults: 0, totalChildren: 0, totalPeople: 0, comingTotal: 0, notComing: 0, unread: 0 };
 
   async function logout() {
     try {
@@ -325,21 +324,23 @@ export default function Admin() {
             </p>
           </article>
           <article className="stat stat--sage">
-            <p className="stat__label">придут</p>
-            <strong className="stat__value">{currentStats.coming}</strong>
+            <p className="stat__label">всего человек</p>
+            <strong className="stat__value">{currentStats.totalPeople}</strong>
             <p className="stat__note">
-              {currentStats.guests} {pluralGuests(currentStats.guests)} всего
+              {currentStats.totalAdults} взрослых и {currentStats.totalChildren} {pluralChildren(currentStats.totalChildren)}
             </p>
           </article>
           <article className="stat stat--blush">
+            <p className="stat__label">смогут</p>
+            <strong className="stat__value">{currentStats.comingTotal}</strong>
+            <p className="stat__note">
+              {currentStats.comingAdults} взрослых и {currentStats.comingChildren} {pluralChildren(currentStats.comingChildren)}
+            </p>
+          </article>
+          <article className="stat stat--gold">
             <p className="stat__label">не смогут</p>
             <strong className="stat__value">{currentStats.notComing}</strong>
             <p className="stat__note">обязательно обнимем при встрече</p>
-          </article>
-          <article className="stat stat--gold">
-            <p className="stat__label">под вопросом</p>
-            <strong className="stat__value">{currentStats.maybe}</strong>
-            <p className="stat__note">ждём финального ответа</p>
           </article>
         </div>
 
@@ -351,7 +352,7 @@ export default function Admin() {
                 type="search"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Имя, контакт или пожелание…"
+                placeholder="Имя или пара…"
                 aria-label="Поиск по записям"
               />
               {query && (
@@ -438,8 +439,9 @@ export default function Admin() {
                 <thead>
                   <tr>
                     <th>гость</th>
+                    <th>пара</th>
                     <th>присутствие</th>
-                    <th>гостей</th>
+                    <th>детей</th>
                     <th>дата ответа</th>
                     <th>статус</th>
                     <th aria-label="Действия" />
@@ -451,7 +453,11 @@ export default function Admin() {
                       <td data-label="Гость">
                         <span className="guest">
                           <strong>{record.name}</strong>
-                          <small>{record.contact}</small>
+                        </span>
+                      </td>
+                      <td data-label="Пара">
+                        <span className="guest">
+                          {record.pair || '—'}
                         </span>
                       </td>
                       <td data-label="Присутствие">
@@ -459,8 +465,8 @@ export default function Admin() {
                           {ATTENDANCE[record.attendance].label}
                         </span>
                       </td>
-                      <td data-label="Гостей">
-                        <span className="guests-count">{record.guests > 0 ? record.guests : '—'}</span>
+                      <td data-label="Детей">
+                        <span className="guests-count">{record.children > 0 ? record.children : '—'}</span>
                       </td>
                       <td data-label="Дата ответа">
                         <span className="record-date">{formatDate(record.createdAt)}</span>
@@ -486,11 +492,6 @@ export default function Admin() {
                       </td>
                       <td data-label="Действия">
                         <div className="row-actions">
-                          {record.message && (
-                            <span className="row-actions__note" title="Есть пожелание">
-                              ✎
-                            </span>
-                          )}
                           <button
                             type="button"
                             className="icon-btn"
@@ -571,9 +572,9 @@ export default function Admin() {
                 {ATTENDANCE[selected.attendance].label}
               </span>
               <span className="modal__chip">
-                {selected.guests > 0
-                  ? `${selected.guests} ${pluralGuests(selected.guests)}`
-                  : 'без гостей'}
+                {selected.children > 0
+                  ? `${selected.children} ${pluralChildren(selected.children)}`
+                  : 'без детей'}
               </span>
               <span className={`status-pill status-pill--${selected.status}`}>
                 <i />
@@ -582,18 +583,14 @@ export default function Admin() {
             </div>
             <dl className="modal__list">
               <div>
-                <dt>контакт</dt>
-                <dd>{selected.contact}</dd>
+                <dt>ФИО пары</dt>
+                <dd className={selected.pair ? '' : 'is-empty'}>
+                  {selected.pair || 'Не указано'}
+                </dd>
               </div>
               <div>
                 <dt>дата ответа</dt>
                 <dd>{formatDate(selected.createdAt)}</dd>
-              </div>
-              <div>
-                <dt>пожелание</dt>
-                <dd className={selected.message ? '' : 'is-empty'}>
-                  {selected.message || 'Гость не оставил пожеланий'}
-                </dd>
               </div>
             </dl>
             <div className="modal__actions">

@@ -12,7 +12,7 @@ const rsvpLimiter = rateLimit({
   message: { error: 'Слишком много отправок. Попробуйте немного позже.' },
 });
 
-const ATTENDANCE = new Set(['yes', 'no', 'maybe']);
+const ATTENDANCE = new Set(['yes', 'no']);
 
 function clean(value, maxLength) {
   return String(value ?? '')
@@ -30,29 +30,24 @@ router.post('/', rsvpLimiter, async (req, res, next) => {
     }
 
     const name = clean(req.body?.name, 120).replace(/\s+/g, ' ');
-    const contact = clean(req.body?.contact, 160).replace(/\s+/g, ' ');
+    const pair = clean(req.body?.pair, 120).replace(/\s+/g, ' ');
     const attendance = ATTENDANCE.has(req.body?.attendance) ? req.body.attendance : 'yes';
-    const rawGuests = Number.parseInt(req.body?.guests, 10);
-    const guests =
-      attendance === 'no'
-        ? 0
-        : Number.isFinite(rawGuests)
-          ? Math.min(Math.max(rawGuests, 1), 10)
-          : 1;
-    const message = clean(req.body?.message, 1000);
+    const rawChildren = Number.parseInt(req.body?.children, 10);
+    const children = Number.isFinite(rawChildren)
+      ? Math.min(Math.max(rawChildren, 0), 20)
+      : 0;
 
     const fields = {};
     if (name.length < 2) fields.name = 'Укажите имя (минимум 2 символа)';
-    if (contact.length < 5) fields.contact = 'Укажите телефон или мессенджер для связи';
 
     if (Object.keys(fields).length > 0) {
       return res.status(422).json({ error: 'Проверьте заполнение формы', fields });
     }
 
     const result = await query(
-      `INSERT INTO rsvps (name, contact, attendance, guests, message)
-       VALUES (?, ?, ?, ?, ?)`,
-      [name, contact, attendance, guests, message || null],
+      `INSERT INTO rsvps (name, pair, attendance, children)
+       VALUES (?, ?, ?, ?)`,
+      [name, pair || null, attendance, children],
     );
 
     return res.status(201).json({ ok: true, id: result.insertId });

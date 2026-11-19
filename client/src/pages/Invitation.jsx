@@ -123,9 +123,8 @@ export default function Invitation() {
               <figure className="about__photo" data-reveal>
                 <img src="/images/family.jpg" alt="Олег, Дулма и Аяна" />
                 <div className="about__head">
-                  <p className="eyebrow">с любовью</p>
                   <h2 className="about__title">
-                    дорогие
+                    Дорогие
                     <br />
                     <em>родные и друзья!</em>
                   </h2>
@@ -200,9 +199,6 @@ export default function Invitation() {
 
                 <Countdown target={content.date.iso} />
                 <p className="date-card__quote script">совсем скоро</p>
-                <p className="date-card__note">
-                  начало праздника в 15:00 · не опаздывайте, мы будем ждать
-                </p>
               </div>
 
               <div
@@ -352,7 +348,7 @@ export default function Invitation() {
       <footer className="footer">
         <div className="wrap footer__inner">
           <div className="footer__head">
-            <p className="footer__script script">с любовью,</p>
+            <p className="footer__script script">с уважением</p>
             <p className="footer__parents script">{content.parents}</p>
           </div>
           <span className="footer__ornament" aria-hidden="true">

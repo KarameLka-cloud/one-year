@@ -3,28 +3,26 @@ import { api } from '../api.js';
 import { CheckIcon } from './Decor.jsx';
 
 const ATTENDANCE_OPTIONS = [
-  { value: 'yes', label: 'буду с радостью' },
-  { value: 'no', label: 'к сожалению, не смогу' },
-  { value: 'maybe', label: 'пока не уверен(а)' },
+  { value: 'yes', label: 'Да, с удовольствием' },
+  { value: 'no', label: 'Нет, к сожалению' },
 ];
 
-const GUEST_OPTIONS = [1, 2, 3, 4, 5, 6];
+const CHILDREN_OPTIONS = [0, 1, 2, 3, 4, 5, 6];
 
-function guestsLabel(count) {
+function childrenLabel(count) {
   const abs = Math.abs(count) % 100;
   const last = abs % 10;
-  if (abs > 10 && abs < 20) return 'гостей';
-  if (last === 1) return 'гость';
-  if (last >= 2 && last <= 4) return 'гостя';
-  return 'гостей';
+  if (abs > 10 && abs < 20) return 'детей';
+  if (last === 1) return 'ребёнок';
+  if (last >= 2 && last <= 4) return 'ребёнка';
+  return 'детей';
 }
 
 const initialForm = {
   name: '',
-  contact: '',
+  pair: '',
+  children: '0',
   attendance: 'yes',
-  guests: '1',
-  message: '',
   company: '', // honeypot
 };
 
@@ -43,8 +41,6 @@ export function RsvpForm() {
     event.preventDefault();
     const nextErrors = {};
     if (form.name.trim().length < 2) nextErrors.name = 'Напишите, пожалуйста, ваше имя';
-    if (form.contact.trim().length < 5)
-      nextErrors.contact = 'Оставьте телефон или ник в мессенджере';
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -57,8 +53,7 @@ export function RsvpForm() {
     try {
       await api.post('/rsvp', {
         ...form,
-        guests: Number(form.guests),
-        message: form.message.trim(),
+        children: Number(form.children),
       });
       setStatus('success');
     } catch (error) {
@@ -104,7 +99,7 @@ export function RsvpForm() {
       <form className="form" onSubmit={handleSubmit} noValidate>
         <div className="form__row">
           <label className={`field${errors.name ? ' has-error' : ''}`} htmlFor="rsvp-name">
-            <span className="field__label">ваше имя</span>
+            <span className="field__label">ФИО гостя</span>
             <input
               id="rsvp-name"
               type="text"
@@ -119,25 +114,22 @@ export function RsvpForm() {
             {errors.name && <span className="field__error">{errors.name}</span>}
           </label>
 
-          <label className={`field${errors.contact ? ' has-error' : ''}`} htmlFor="rsvp-contact">
-            <span className="field__label">телефон или мессенджер</span>
+          <label className="field" htmlFor="rsvp-pair">
+            <span className="field__label">ФИО пары</span>
             <input
-              id="rsvp-contact"
+              id="rsvp-pair"
               type="text"
-              name="contact"
-              value={form.contact}
-              onChange={update('contact')}
-              placeholder="+7 ··· / Telegram / MAX"
-              autoComplete="tel"
-              maxLength={160}
-              aria-invalid={Boolean(errors.contact)}
+              name="pair"
+              value={form.pair}
+              onChange={update('pair')}
+              placeholder="Имена пары (необязательно)"
+              maxLength={120}
             />
-            {errors.contact && <span className="field__error">{errors.contact}</span>}
           </label>
         </div>
 
         <fieldset className="field field--choices">
-          <legend className="field__label">сможете присоединиться?</legend>
+          <legend className="field__label">Будете ли присутствовать на мероприятии?</legend>
           <div className="choices">
             {ATTENDANCE_OPTIONS.map((option) => (
               <label className="choice" key={option.value}>
@@ -154,32 +146,18 @@ export function RsvpForm() {
           </div>
         </fieldset>
 
-        {form.attendance !== 'no' && (
-          <label className="field field--narrow" htmlFor="rsvp-guests">
-            <span className="field__label">сколько вас будет?</span>
-            <select id="rsvp-guests" name="guests" value={form.guests} onChange={update('guests')}>
-              {GUEST_OPTIONS.map((count) => (
+        {form.attendance === 'yes' && (
+          <label className="field field--narrow" htmlFor="rsvp-children">
+            <span className="field__label">количество детей</span>
+            <select id="rsvp-children" name="children" value={form.children} onChange={update('children')}>
+              {CHILDREN_OPTIONS.map((count) => (
                 <option value={count} key={count}>
-                  {count} {guestsLabel(count)}
+                  {count} {childrenLabel(count)}
                 </option>
               ))}
             </select>
           </label>
         )}
-
-        <label className="field field--full" htmlFor="rsvp-message">
-          <span className="field__label">пожелания или тёплые слова</span>
-          <textarea
-            id="rsvp-message"
-            name="message"
-            value={form.message}
-            onChange={update('message')}
-            placeholder="Например, нужен детский стульчик или вы приедете с малышом…"
-            rows={4}
-            maxLength={600}
-          />
-          <span className="field__counter">{form.message.length}/600</span>
-        </label>
 
         <label className="hp" aria-hidden="true" tabIndex={-1}>
           <span>Не заполняйте это поле</span>
