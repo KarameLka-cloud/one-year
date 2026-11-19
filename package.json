@@ -1,0 +1,16 @@
+{
+  "name": "one-year-invitation",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Сайт-приглашение на первый день рождения + админка (React, Express, MySQL)",
+  "scripts": {
+    "install:all": "npm install && npm --prefix server install && npm --prefix client install",
+    "db:init": "npm --prefix server run db:init",
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
+    "build": "npm --prefix client run build",
+    "start": "npm --prefix server start"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

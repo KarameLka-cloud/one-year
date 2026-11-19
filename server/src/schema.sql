@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS admins (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  login VARCHAR(64) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  UNIQUE KEY uq_admins_login (login)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS rsvps (
+  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(120) NOT NULL,
+  contact VARCHAR(160) NOT NULL,
+  attendance ENUM('yes', 'no', 'maybe') NOT NULL DEFAULT 'yes',
+  guests TINYINT UNSIGNED NOT NULL DEFAULT 1,
+  message TEXT NULL,
+  status ENUM('new', 'processed') NOT NULL DEFAULT 'new',
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_rsvps_status (status),
+  KEY idx_rsvps_created_at (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
