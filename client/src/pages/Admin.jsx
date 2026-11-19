@@ -281,7 +281,7 @@ export default function Admin() {
           <Link to="/" className="admin__brand">
             <span className="admin__brand-mark">Н</span>
             <span className="admin__brand-text">
-              <strong>номина</strong>
+              <strong>Аяна</strong>
               <small>панель организатора</small>
             </span>
           </Link>

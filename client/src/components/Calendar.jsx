@@ -31,7 +31,7 @@ export function Calendar({ year, month, eventDay }) {
                   : String(day)
               }
             >
-              {day === eventDay ? <span className="calendar__event-day">0{day}</span> : day}
+              {day === eventDay ? <span className="calendar__event-day">{day}</span> : day}
             </span>
           ),
         )}

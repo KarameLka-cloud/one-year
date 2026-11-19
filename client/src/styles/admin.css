@@ -72,7 +72,7 @@
   padding: 48px 32px;
   text-align: center;
   background:
-    radial-gradient(110% 80% at 25% 15%, rgba(255, 250, 243, 0.6), transparent 55%),
+    radial-gradient(110% 80% at 25% 15%, rgba(255, 245, 248, 0.6), transparent 55%),
     linear-gradient(154deg, #f4ded8 0%, #e4bfb6 52%, #d3a79c 100%);
 }
 
@@ -125,7 +125,7 @@
   margin-top: 2px;
   font-size: clamp(2rem, 3.4vw, 2.6rem);
   line-height: 1;
-  color: #fffaf3;
+  color: #fff5f8;
 }
 
 .auth__art-note {
@@ -236,7 +236,7 @@
   top: 0;
   z-index: 50;
   border-bottom: 1px solid var(--line);
-  background: rgba(251, 246, 238, 0.84);
+  background: rgba(255, 245, 248, 0.84);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
@@ -264,8 +264,8 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: linear-gradient(140deg, #f2ddd7, #dcb3a9);
-  color: #fffaf3;
+  background: linear-gradient(140deg, #f5d0da, #e8a8b8);
+  color: #fff5f8;
   font-family: var(--serif);
   font-size: 29.1px;
   font-style: italic;
@@ -421,12 +421,12 @@
 
 .stat--dark {
   border-color: transparent;
-  background: linear-gradient(155deg, #4a3e37, #332a25);
+  background: linear-gradient(155deg, #5a3a44, #442a34);
   color: var(--ivory);
 }
 
 .stat--dark .stat__label {
-  color: rgba(251, 246, 238, 0.55);
+  color: rgba(255, 245, 248, 0.55);
 }
 
 .stat--sage {
@@ -477,7 +477,7 @@
   padding: 0 14px;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: rgba(251, 246, 238, 0.7);
+  background: rgba(255, 245, 248, 0.7);
   color: var(--muted);
   transition:
     border-color 0.2s ease,
@@ -862,7 +862,7 @@
 .records__skeleton-row span {
   height: 12px;
   border-radius: 6px;
-  background: linear-gradient(90deg, #f2e8dd 25%, #fbf6ee 50%, #f2e8dd 75%);
+  background: linear-gradient(90deg, #f5dce6 25%, #fdf5f7 50%, #f5dce6 75%);
   background-size: 240px 100%;
   animation: shimmer 1.3s linear infinite;
 }
@@ -884,8 +884,8 @@
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background: linear-gradient(140deg, #f2ddd7, #dcb3a9);
-  color: #fffaf3;
+  background: linear-gradient(140deg, #f5d0da, #e8a8b8);
+  color: #fff5f8;
   font-family: var(--serif);
   font-size: 40.9px;
   font-style: italic;

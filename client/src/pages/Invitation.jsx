@@ -1,10 +1,9 @@
-import { useState } from 'react';
-import { content } from '../content.js';
-import { useReveal } from '../components/useReveal.js';
-import { MusicToggle } from '../components/MusicToggle.jsx';
-import { Calendar } from '../components/Calendar.jsx';
-import { Countdown } from '../components/Countdown.jsx';
-import { RsvpForm } from '../components/RsvpForm.jsx';
+import { useState } from "react";
+import { content } from "../content.js";
+import { useReveal } from "../components/useReveal.js";
+import { Calendar } from "../components/Calendar.jsx";
+import { Countdown } from "../components/Countdown.jsx";
+import { RsvpForm } from "../components/RsvpForm.jsx";
 import {
   ArrowDown,
   Balloons,
@@ -14,7 +13,7 @@ import {
   Sparkle,
   Sprig,
   Sticker,
-} from '../components/Decor.jsx';
+} from "../components/Decor.jsx";
 
 function Portrait() {
   const [failed, setFailed] = useState(false);
@@ -23,8 +22,13 @@ function Portrait() {
   return (
     <figure className="portrait">
       <span className="portrait__ring" aria-hidden="true" />
-      <span className="portrait__ring portrait__ring--inner" aria-hidden="true" />
-      <div className={`portrait__arch${showPhoto ? ' portrait__arch--photo' : ''}`}>
+      <span
+        className="portrait__ring portrait__ring--inner"
+        aria-hidden="true"
+      />
+      <div
+        className={`portrait__arch${showPhoto ? " portrait__arch--photo" : ""}`}
+      >
         {showPhoto ? (
           <img
             className="portrait__photo"
@@ -45,7 +49,6 @@ function Portrait() {
           </>
         )}
       </div>
-      <Balloons className="hero__balloons" />
       <Sticker className="portrait__sticker" />
     </figure>
   );
@@ -73,18 +76,17 @@ export default function Invitation() {
 
           <div className="hero__inner">
             <div className="hero__copy">
-              <p className="hero__kicker eyebrow">дорогие родные и друзья</p>
+              <p className="hero__kicker eyebrow">Дорогие родные и друзья!</p>
               <h1 className="hero__name">{content.name}</h1>
               <p className="hero__script">{content.eventTitle}</p>
               <p className="hero__lede">
-                Нашей любимой малышке исполняется один год. Будем счастливы разделить этот тёплый
-                день с самыми близкими людьми.
+                Приглашаем Вас отметить с нами важное событие для нашей семьи!
               </p>
 
               <div className="hero__facts">
                 <div>
                   <span>дата</span>
-                  <strong>06.12.2026</strong>
+                  <strong>26.02.2027</strong>
                 </div>
                 <div>
                   <span>сбор гостей</span>
@@ -99,10 +101,15 @@ export default function Invitation() {
 
             <div className="hero__art">
               <Portrait />
+              <Balloons className="hero__balloons" />
             </div>
           </div>
 
-          <a className="scroll-cue" href="#about" aria-label="Перейти к тексту приглашения">
+          <a
+            className="scroll-cue"
+            href="#about"
+            aria-label="Перейти к тексту приглашения"
+          >
             <span>листайте вниз</span>
             <span className="scroll-cue__line" aria-hidden="true">
               <ArrowDown size={12} />
@@ -114,7 +121,7 @@ export default function Invitation() {
           <div className="wrap about__wrap">
             <div className="about__visual">
               <figure className="about__photo" data-reveal>
-                <img src="/images/family.jpg" alt="Баир, Туяна и Номина" />
+                <img src="/images/family.jpg" alt="Олег, Дулма и Аяна" />
                 <div className="about__head">
                   <p className="eyebrow">с любовью</p>
                   <h2 className="about__title">
@@ -129,21 +136,24 @@ export default function Invitation() {
 
             <div className="about__body">
               <p className="about__lead" data-reveal>
-                Нашей любимой доченьке <strong>Номине</strong> исполняется <em>один год</em>.
+                Нашей любимой доченьке <strong>Аяне</strong> исполняется{" "}
+                <em>один год</em>.
               </p>
-              <p data-reveal style={{ '--d': '0.08s' }}>
-                Для нас этот день — прекрасный повод собрать вместе всех, кого мы так любим.
+              <p data-reveal style={{ "--d": "0.08s" }}>
+                Мы готовим уютный праздник, где детям будет весело и просторно
+                играть, а взрослым — приятно и тепло общаться. Будем рады видеть
+                всех!
               </p>
-              <p data-reveal style={{ '--d': '0.16s' }}>
-                Мы готовим уютный праздник, где детям будет весело и просторно играть, а взрослым —
-                приятно и тепло общаться.
-              </p>
-              <p className="about__signature script" data-reveal style={{ '--d': '0.24s' }}>
-                с нетерпением ждём встречи
+              <p
+                className="about__signature script"
+                data-reveal
+                style={{ "--d": "0.24s" }}
+              >
+                С нетерпением ждём встречи!
               </p>
             </div>
 
-            <div className="about__stats" data-reveal style={{ '--d': '0.1s' }}>
+            <div className="about__stats" data-reveal style={{ "--d": "0.1s" }}>
               <div>
                 <strong>12</strong>
                 <span>месяцев</span>
@@ -167,7 +177,7 @@ export default function Invitation() {
             <div className="section-head" data-reveal>
               <p className="eyebrow">когда</p>
               <h2 className="section-title">
-                декабрь <em>2026</em>
+                февраль <em>2027</em>
               </h2>
             </div>
 
@@ -190,15 +200,23 @@ export default function Invitation() {
 
                 <Countdown target={content.date.iso} />
                 <p className="date-card__quote script">совсем скоро</p>
-                <p className="date-card__note">начало праздника в 16:00 · не опаздывайте, мы будем ждать</p>
+                <p className="date-card__note">
+                  начало праздника в 15:00 · не опаздывайте, мы будем ждать
+                </p>
               </div>
 
-              <div className="calendar-card" data-reveal style={{ '--d': '0.1s' }}>
+              <div
+                className="calendar-card"
+                data-reveal
+                style={{ "--d": "0.1s" }}
+              >
                 <div className="calendar-card__head">
-                  <span className="calendar-card__month script">декабрь</span>
-                  <span className="calendar-card__year">{content.date.year}</span>
+                  <span className="calendar-card__month script">февраль</span>
+                  <span className="calendar-card__year">
+                    {content.date.year}
+                  </span>
                 </div>
-                <Calendar year={2026} month={11} eventDay={6} />
+                <Calendar year={2027} month={1} eventDay={26} />
                 <p className="calendar-card__note">
                   <Heart size={14} />
                   отмечен день, когда нам будет особенно тепло
@@ -211,38 +229,30 @@ export default function Invitation() {
         <section className="section where" id="where">
           <div className="wrap where__grid">
             <div className="place" data-reveal>
-              <div className="place__map" aria-hidden="true">
-                <span className="place__road place__road--one" />
-                <span className="place__road place__road--two" />
-                <span className="place__road place__road--three" />
-                <span className="place__block place__block--one" />
-                <span className="place__block place__block--two" />
-                <span className="place__pin">
-                  <span className="place__pin-pulse" />
-                  <PinIcon size={30} />
-                </span>
-                <span className="place__district">центр города</span>
-              </div>
-              <div className="place__label">
-                <span>{content.venue.label}</span>
-                <strong>{content.venue.name}</strong>
-              </div>
+              <iframe
+                src="https://yandex.ru/map-widget/v1/?um=constructor%3A67cb8e593cfe9ea4410a75fc2773767ac68d0c15a144e02a3e09da4326ab5467&amp;source=constructor"
+                width="640"
+                height="440"
+                frameborder="0"
+              ></iframe>
             </div>
 
-            <div className="where__copy" data-reveal style={{ '--d': '0.1s' }}>
+            <div className="where__copy" data-reveal style={{ "--d": "0.1s" }}>
               <p className="eyebrow">где</p>
               <h2 className="section-title">
-                {content.venue.label} <em>{content.venue.name}</em>
+                {content.venue.label}
+                <br />
+                <em>{content.venue.name}</em>
               </h2>
               <p className="where__address">
                 {content.venue.address}
                 <br />
                 {content.venue.city}
               </p>
-              <p className="where__note">
-                Просторный зал, детская зона и парковка рядом. Если понадобится помощь с дорогой —
-                просто напишите нам.
-              </p>
+              {/* <p className="where__note">
+                Просторный зал, детская зона и парковка рядом. Если понадобится
+                помощь с дорогой — просто напишите нам.
+              </p> */}
               <a
                 className="btn btn--ghost"
                 href={content.venue.mapUrl}
@@ -271,7 +281,7 @@ export default function Invitation() {
                   className="timeline__item"
                   key={item.time}
                   data-reveal
-                  style={{ '--d': `${index * 0.09}s` }}
+                  style={{ "--d": `${index * 0.09}s` }}
                 >
                   <span className="timeline__icon">
                     <ProgramIcon name={item.icon} />
@@ -288,7 +298,7 @@ export default function Invitation() {
           </div>
         </section>
 
-        <section className="section dress" id="dresscode">
+        {/* <section className="section dress" id="dresscode">
           <div className="wrap">
             <div className="dress__card" data-reveal>
               <div className="dress__copy">
@@ -300,7 +310,7 @@ export default function Invitation() {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
         <section className="section rsvp" id="rsvp">
           <div className="wrap rsvp__grid">
@@ -310,8 +320,8 @@ export default function Invitation() {
                 будете <em>с нами?</em>
               </h2>
               <p className="rsvp__text">
-                Пожалуйста, ответьте до {content.rsvpDeadline} — так мы сможем всё подготовить и
-                никого не забыть.
+                Пожалуйста, ответьте до {content.rsvpDeadline} — так мы сможем
+                всё подготовить и никого не забыть.
               </p>
               <div className="rsvp__contacts">
                 <p className="eyebrow">если есть вопросы</p>
@@ -328,7 +338,11 @@ export default function Invitation() {
               </div>
             </div>
 
-            <div className="rsvp__form-wrap" data-reveal style={{ '--d': '0.1s' }}>
+            <div
+              className="rsvp__form-wrap"
+              data-reveal
+              style={{ "--d": "0.1s" }}
+            >
               <RsvpForm />
             </div>
           </div>
@@ -347,7 +361,9 @@ export default function Invitation() {
             <span />
           </span>
           <div className="footer__bottom">
-            <p className="footer__meta">{content.date.short} · {content.venue.city}</p>
+            <p className="footer__meta">
+              {content.date.short} · {content.venue.city}
+            </p>
             <div className="footer__contacts">
               {content.contacts.map((contact) => (
                 <a key={contact.href} href={contact.href}>
@@ -355,12 +371,10 @@ export default function Invitation() {
                 </a>
               ))}
             </div>
-            <p className="footer__copy">сделано с любовью · 2026</p>
+            <p className="footer__copy">сделано с любовью · 2027</p>
           </div>
         </div>
       </footer>
-
-      <MusicToggle />
     </>
   );
 }

@@ -3,24 +3,24 @@
    ============================================================ */
 
 :root {
-  --ivory: #fbf6ee;
-  --paper: #fffcf6;
-  --cream: #f4e9da;
-  --blush: #e9cbc3;
-  --blush-soft: #f3ded8;
-  --blush-deep: #d6a49b;
-  --rose: #bd8179;
-  --rose-dark: #a4695f;
-  --sage: #c6d0ba;
-  --sage-deep: #8d9c81;
-  --gold: #b28a52;
-  --gold-soft: #dfc7a4;
-  --ink: #423832;
-  --ink-soft: #6b5c53;
-  --muted: #9b8b81;
-  --line: rgba(84, 62, 50, 0.13);
-  --shadow-soft: 0 30px 70px -40px rgba(90, 62, 48, 0.45);
-  --shadow-card: 0 20px 45px -30px rgba(90, 62, 48, 0.5);
+  --ivory: #fdf5f7;
+  --paper: #fff8fa;
+  --cream: #f8dfe6;
+  --blush: #f0c4d0;
+  --blush-soft: #f9dce4;
+  --blush-deep: #e8a8b8;
+  --rose: #d4849a;
+  --rose-dark: #b8657e;
+  --sage: #e8c4cc;
+  --sage-deep: #c99aaa;
+  --gold: #d4a89a;
+  --gold-soft: #e8c4b8;
+  --ink: #5a3a44;
+  --ink-soft: #7a5460;
+  --muted: #b08a96;
+  --line: rgba(120, 80, 95, 0.13);
+  --shadow-soft: 0 30px 70px -40px rgba(120, 70, 85, 0.35);
+  --shadow-card: 0 20px 45px -30px rgba(120, 70, 85, 0.4);
   --serif: 'Cormorant Garamond', 'Times New Roman', serif;
   --sans: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --script: 'Marck Script', 'Segoe Script', cursive;
@@ -47,9 +47,9 @@ body {
   font-weight: 400;
   color: var(--ink);
   background:
-    radial-gradient(1200px 800px at 88% -8%, rgba(233, 203, 195, 0.5), transparent 60%),
-    radial-gradient(900px 700px at -10% 18%, rgba(198, 208, 186, 0.32), transparent 55%),
-    radial-gradient(800px 600px at 50% 108%, rgba(223, 199, 164, 0.3), transparent 60%),
+    radial-gradient(1200px 800px at 88% -8%, rgba(240, 196, 208, 0.5), transparent 60%),
+    radial-gradient(900px 700px at -10% 18%, rgba(232, 196, 204, 0.32), transparent 55%),
+    radial-gradient(800px 600px at 50% 108%, rgba(212, 168, 154, 0.3), transparent 60%),
     var(--ivory);
   background-attachment: fixed;
   overflow-x: clip;
