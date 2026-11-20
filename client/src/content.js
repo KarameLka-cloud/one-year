@@ -7,7 +7,6 @@ export const content = {
   age: "1 год",
   eventTitle: "первый день рождения",
   parents: "Олег и Дулма",
-  parentsShort: "Олег и Дулма",
 
   // Фото для арки на первом экране. Можно заменить файл
   // client/public/images/portrait.jpg или указать свой путь в client/.env
@@ -56,17 +55,6 @@ export const content = {
 
   contacts: [
     { label: "+7 (929) 485-90-11", href: "tel:+79294859011" },
-  ],
-
-  dressCode:
-    "Никаких строгих ограничений нет. Но мы будем очень рады видеть вас в нарядных и праздничных образах.",
-
-  palette: [
-    { name: "пудровый", color: "#e3bdb5" },
-    { name: "кремовый", color: "#f6e8d8" },
-    { name: "шалфей", color: "#c6d0ba" },
-    { name: "золото", color: "#c9a978" },
-    { name: "какао", color: "#8a6f60" },
   ],
 
   rsvpDeadline: "08 февраля",

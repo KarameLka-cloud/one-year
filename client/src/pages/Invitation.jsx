@@ -294,19 +294,7 @@ export default function Invitation() {
           </div>
         </section>
 
-        {/* <section className="section dress" id="dresscode">
-          <div className="wrap">
-            <div className="dress__card" data-reveal>
-              <div className="dress__copy">
-                <p className="eyebrow">дресс-код</p>
-                <h2 className="section-title">
-                  нарядные <em>и счастливые</em>
-                </h2>
-                <p>{content.dressCode}</p>
-              </div>
-            </div>
-          </div>
-        </section> */}
+
 
         <section className="section rsvp" id="rsvp">
           <div className="wrap rsvp__grid">
