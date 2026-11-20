@@ -21,15 +21,7 @@ export const config = {
   port: toNumber(process.env.PORT, 4000),
   trustProxy: process.env.TRUST_PROXY ? toNumber(process.env.TRUST_PROXY, 0) : 0,
 
-  db: {
-    host: process.env.DB_HOST || '127.0.0.1',
-    port: toNumber(process.env.DB_PORT, 3306),
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'one_year_invitation',
-    connectionLimit: 10,
-    charset: 'utf8mb4',
-  },
+  dbPath: process.env.DB_PATH || path.join(projectRoot, 'data', 'invite.db'),
 
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
   sessionHours: toNumber(process.env.SESSION_HOURS, 12),

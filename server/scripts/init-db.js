@@ -1,17 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
+import Database from 'better-sqlite3';
 import { config } from '../src/config.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const schemaPath = path.join(here, '../src/schema.sql');
-
-if (!/^[a-zA-Z0-9_]+$/.test(config.db.database)) {
-  console.error('DB_NAME может содержать только латиницу, цифры и подчёркивания.');
-  process.exit(1);
-}
 
 const demoRecords = [
   ['Анна Петрова', 'Сергей и Мария', 'yes', 1],
@@ -20,44 +15,53 @@ const demoRecords = [
 ];
 
 async function main() {
-  const connection = await mysql.createConnection({
-    host: config.db.host,
-    port: config.db.port,
-    user: config.db.user,
-    password: config.db.password,
-    multipleStatements: true,
-  });
+  // Убеждаемся, что директория существует
+  const dbDir = path.dirname(config.dbPath);
+  if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+
+  // Удаляем старую БД если есть (для чистого старта)
+  if (fs.existsSync(config.dbPath)) {
+    fs.unlinkSync(config.dbPath);
+  }
+  // Удаляем сопутствующие WAL и SHM файлы
+  for (const ext of ['-wal', '-shm']) {
+    const walPath = config.dbPath + ext;
+    if (fs.existsSync(walPath)) fs.unlinkSync(walPath);
+  }
+
+  const database = new Database(config.dbPath);
+  database.pragma('journal_mode = WAL');
+  database.pragma('foreign_keys = ON');
 
   try {
-    await connection.query(
-      `CREATE DATABASE IF NOT EXISTS \`${config.db.database}\`
-       CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`,
-    );
-    await connection.query(`USE \`${config.db.database}\``);
-
+    // Загружаем схему
     const schema = fs.readFileSync(schemaPath, 'utf8');
-    await connection.query(schema);
-    console.log(`✓ База «${config.db.database}» и таблицы готовы`);
+    database.exec(schema);
+    console.log(`✓ База «${config.dbPath}» и таблицы готовы`);
 
+    // Создаём администратора
     const login = config.adminLogin.trim().toLowerCase();
     const passwordHash = await bcrypt.hash(config.adminPassword, 12);
-    await connection.query(
-      `INSERT INTO admins (login, password_hash) VALUES (?, ?)
-       ON DUPLICATE KEY UPDATE password_hash = ?`,
-      [login, passwordHash, passwordHash],
+    database.exec(
+      `INSERT INTO admins (login, password_hash) VALUES ('${login.replace(/'/g, "''")}', '${passwordHash.replace(/'/g, "''")}')`,
     );
     console.log(`✓ Администратор «${login}» создан / пароль обновлён`);
 
+    // Демо-записи
     if (config.seedDemo) {
-      const [rows] = await connection.query('SELECT COUNT(*) AS total FROM rsvps');
-      if (Number(rows[0]?.total || 0) === 0) {
-        for (const record of demoRecords) {
-          await connection.query(
-            `INSERT INTO rsvps (name, pair, attendance, children)
-             VALUES (?, ?, ?, ?)`,
-            record,
-          );
-        }
+      const row = database.prepare('SELECT COUNT(*) AS total FROM rsvps').get();
+      if (Number(row.total) === 0) {
+        const insert = database.prepare(
+          'INSERT INTO rsvps (name, pair, attendance, children) VALUES (?, ?, ?, ?)',
+        );
+        const insertMany = database.transaction((records) => {
+          for (const record of records) {
+            insert.run(record);
+          }
+        });
+        insertMany(demoRecords);
         console.log(`✓ Добавлено демонстрационных записей: ${demoRecords.length}`);
       } else {
         console.log('· Демо-записи не добавлены: таблица уже содержит данные');
@@ -68,13 +72,13 @@ async function main() {
     console.log(`Логин: ${login}`);
     console.log(`Пароль: ${config.adminPassword}\n`);
   } finally {
-    await connection.end();
+    database.close();
   }
 }
 
 main().catch((error) => {
   console.error('\nНе удалось инициализировать базу данных.');
   console.error(error.message);
-  console.error('\nПроверьте параметры MySQL в server/.env\n');
+  console.error('\nПроверьте параметры в server/.env\n');
   process.exit(1);
 });

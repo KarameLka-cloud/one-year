@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { query } from '../db.js';
+import { db, query } from '../db.js';
 
 const router = Router();
 
-const STATUSES = new Set(['new', 'processed']);
 const ATTENDANCE_LABELS = { yes: 'Придёт', no: 'Не придёт' };
 
 function toRecord(row) {
@@ -13,7 +12,6 @@ function toRecord(row) {
     pair: row.pair || '',
     attendance: row.attendance,
     children: Number(row.children),
-    status: row.status,
     createdAt: row.created_at_unix
       ? new Date(Number(row.created_at_unix) * 1000).toISOString()
       : null,
@@ -21,20 +19,21 @@ function toRecord(row) {
 }
 
 async function getStats() {
-  const rows = await query(
+  const rows = await db.query(
     `SELECT
        COUNT(*) AS total,
-       COUNT(*) + SUM(pair IS NOT NULL) AS totalAdults,
+       COUNT(*) + SUM(CASE WHEN pair IS NOT NULL AND TRIM(pair) != '' THEN 1 ELSE 0 END) AS totalAdults,
        COALESCE(SUM(children), 0) AS totalChildren,
-       COUNT(*) + SUM(pair IS NOT NULL) + COALESCE(SUM(children), 0) AS totalPeople,
+       COUNT(*) + SUM(CASE WHEN pair IS NOT NULL AND TRIM(pair) != '' THEN 1 ELSE 0 END) + COALESCE(SUM(children), 0) AS totalPeople,
        COALESCE(SUM(CASE WHEN attendance = 'yes' THEN 1 ELSE 0 END), 0)
-         + COALESCE(SUM(CASE WHEN attendance = 'yes' THEN pair IS NOT NULL ELSE 0 END), 0) AS comingAdults,
+         + COALESCE(SUM(CASE WHEN attendance = 'yes' AND pair IS NOT NULL AND TRIM(pair) != '' THEN 1 ELSE 0 END), 0) AS comingAdults,
        COALESCE(SUM(CASE WHEN attendance = 'yes' THEN children ELSE 0 END), 0) AS comingChildren,
        COALESCE(SUM(CASE WHEN attendance = 'yes' THEN 1 ELSE 0 END), 0)
-         + COALESCE(SUM(CASE WHEN attendance = 'yes' THEN pair IS NOT NULL ELSE 0 END), 0)
+         + COALESCE(SUM(CASE WHEN attendance = 'yes' AND pair IS NOT NULL AND TRIM(pair) != '' THEN 1 ELSE 0 END), 0)
          + COALESCE(SUM(CASE WHEN attendance = 'yes' THEN children ELSE 0 END), 0) AS comingTotal,
-       COALESCE(SUM(attendance = 'no'), 0) AS notComing,
-       COALESCE(SUM(status = 'new'), 0) AS unread
+       COALESCE(SUM(CASE WHEN attendance = 'no' THEN 1 ELSE 0 END), 0)
+         + COALESCE(SUM(CASE WHEN attendance = 'no' AND pair IS NOT NULL AND TRIM(pair) != '' THEN 1 ELSE 0 END), 0)
+         + COALESCE(SUM(CASE WHEN attendance = 'no' THEN children ELSE 0 END), 0) AS notComing
      FROM rsvps`,
   );
   const row = rows[0] || {};
@@ -47,18 +46,13 @@ async function getStats() {
     comingChildren: Number(row.comingChildren || 0),
     comingTotal: Number(row.comingTotal || 0),
     notComing: Number(row.notComing || 0),
-    unread: Number(row.unread || 0),
   };
 }
 
-function buildFilters({ status, q }) {
+function buildFilters({ q }) {
   const where = [];
   const params = [];
 
-  if (STATUSES.has(status)) {
-    where.push('status = ?');
-    params.push(status);
-  }
   if (q) {
     where.push('(name LIKE ? OR pair LIKE ?)');
     const like = `%${q}%`;
@@ -77,21 +71,20 @@ router.get('/rsvps', async (req, res, next) => {
     const limit = Math.min(Math.max(Number.parseInt(req.query.limit, 10) || 10, 1), 100);
     const offset = (page - 1) * limit;
     const q = String(req.query.q || '').trim().slice(0, 120);
-    const status = String(req.query.status || '').trim();
 
-    const { clause, params } = buildFilters({ status, q });
+    const { clause, params } = buildFilters({ q });
 
     const [rows, countRows, stats] = await Promise.all([
-      query(
-        `SELECT id, name, pair, attendance, children, status,
-                UNIX_TIMESTAMP(created_at) AS created_at_unix
+      db.query(
+        `SELECT id, name, pair, attendance, children,
+                CAST(strftime('%s', created_at) AS INTEGER) AS created_at_unix
          FROM rsvps
          ${clause}
          ORDER BY created_at DESC, id DESC
          LIMIT ? OFFSET ?`,
         [...params, limit, offset],
       ),
-      query(`SELECT COUNT(*) AS total FROM rsvps ${clause}`, params),
+      db.query(`SELECT COUNT(*) AS total FROM rsvps ${clause}`, params),
       getStats(),
     ]);
 
@@ -110,12 +103,11 @@ router.get('/rsvps', async (req, res, next) => {
 router.get('/rsvps/export', async (req, res, next) => {
   try {
     const q = String(req.query.q || '').trim().slice(0, 120);
-    const status = String(req.query.status || '').trim();
-    const { clause, params } = buildFilters({ status, q });
+    const { clause, params } = buildFilters({ q });
 
     const rows = await query(
-      `SELECT id, name, pair, attendance, children, status,
-              UNIX_TIMESTAMP(created_at) AS created_at_unix
+      `SELECT id, name, pair, attendance, children,
+              CAST(strftime('%s', created_at) AS INTEGER) AS created_at_unix
        FROM rsvps
        ${clause}
        ORDER BY created_at DESC, id DESC`,
@@ -128,7 +120,7 @@ router.get('/rsvps/export', async (req, res, next) => {
       return `"${text.replace(/"/g, '""')}"`;
     };
 
-    const header = ['ID', 'Дата', 'Имя', 'Пара', 'Присутствие', 'Дети', 'Статус'];
+    const header = ['ID', 'Дата', 'Имя', 'Пара', 'Присутствие', 'Дети'];
     const lines = rows.map((row) => {
       const date = row.created_at_unix
         ? new Date(Number(row.created_at_unix) * 1000).toLocaleString('ru-RU', {
@@ -143,7 +135,6 @@ router.get('/rsvps/export', async (req, res, next) => {
         row.pair || '',
         ATTENDANCE_LABELS[row.attendance] || row.attendance,
         row.children,
-        row.status === 'new' ? 'Новая' : 'Обработана',
       ].map(escapeCell).join(';');
     });
 
@@ -158,29 +149,6 @@ router.get('/rsvps/export', async (req, res, next) => {
   }
 });
 
-router.patch('/rsvps/:id', async (req, res, next) => {
-  try {
-    const id = Number.parseInt(req.params.id, 10);
-    const status = String(req.body?.status || '');
-
-    if (!Number.isFinite(id) || id < 1) {
-      return res.status(400).json({ error: 'Некорректный идентификатор' });
-    }
-    if (!STATUSES.has(status)) {
-      return res.status(422).json({ error: 'Некорректный статус' });
-    }
-
-    const result = await query('UPDATE rsvps SET status = ? WHERE id = ?', [status, id]);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Запись не найдена' });
-    }
-
-    return res.json({ ok: true, id, status });
-  } catch (error) {
-    return next(error);
-  }
-});
-
 router.delete('/rsvps/:id', async (req, res, next) => {
   try {
     const id = Number.parseInt(req.params.id, 10);
@@ -188,8 +156,8 @@ router.delete('/rsvps/:id', async (req, res, next) => {
       return res.status(400).json({ error: 'Некорректный идентификатор' });
     }
 
-    const result = await query('DELETE FROM rsvps WHERE id = ?', [id]);
-    if (result.affectedRows === 0) {
+    const result = await db.run('DELETE FROM rsvps WHERE id = ?', [id]);
+    if (result.changes === 0) {
       return res.status(404).json({ error: 'Запись не найдена' });
     }
 

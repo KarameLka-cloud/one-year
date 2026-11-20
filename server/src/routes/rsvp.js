@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { rateLimit } from 'express-rate-limit';
-import { query } from '../db.js';
+import { db } from '../db.js';
 
 const router = Router();
 
@@ -44,13 +44,13 @@ router.post('/', rsvpLimiter, async (req, res, next) => {
       return res.status(422).json({ error: 'Проверьте заполнение формы', fields });
     }
 
-    const result = await query(
+    const result = await db.run(
       `INSERT INTO rsvps (name, pair, attendance, children)
        VALUES (?, ?, ?, ?)`,
       [name, pair || null, attendance, children],
     );
 
-    return res.status(201).json({ ok: true, id: result.insertId });
+    return res.status(201).json({ ok: true, id: Number(result.lastInsertRowid) });
   } catch (error) {
     return next(error);
   }

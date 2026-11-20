@@ -83,7 +83,6 @@ export default function Admin() {
   const [stats, setStats] = useState(null);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('');
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -91,7 +90,6 @@ export default function Admin() {
   const [actionError, setActionError] = useState('');
   const [selected, setSelected] = useState(null);
   const [toDelete, setToDelete] = useState(null);
-  const [busyId, setBusyId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const mounted = useRef(true);
@@ -132,7 +130,6 @@ export default function Admin() {
     setError('');
 
     const params = new URLSearchParams({ page: String(page), limit: String(LIMIT) });
-    if (statusFilter) params.set('status', statusFilter);
     if (search) params.set('q', search);
 
     api
@@ -159,7 +156,7 @@ export default function Admin() {
     return () => {
       active = false;
     };
-  }, [auth, page, statusFilter, search, reloadKey, goToLogin]);
+  }, [auth, page, search, reloadKey, goToLogin]);
 
   useEffect(() => {
     if (!actionError) return undefined;
@@ -199,37 +196,6 @@ export default function Admin() {
     setSelected(record);
   }
 
-  async function toggleStatus(record) {
-    const nextStatus = record.status === 'new' ? 'processed' : 'new';
-    setBusyId(record.id);
-    setActionError('');
-    try {
-      await api.patch(`/admin/rsvps/${record.id}`, { status: nextStatus });
-      setItems((prev) =>
-        prev.map((item) => (item.id === record.id ? { ...item, status: nextStatus } : item)),
-      );
-      setStats((prev) =>
-        prev
-          ? {
-              ...prev,
-              unread: Math.max(prev.unread + (nextStatus === 'new' ? 1 : -1), 0),
-            }
-          : prev,
-      );
-      setSelected((prev) =>
-        prev && prev.id === record.id ? { ...prev, status: nextStatus } : prev,
-      );
-    } catch (err) {
-      if (err.status === 401) {
-        goToLogin();
-        return;
-      }
-      setActionError(err.message);
-    } finally {
-      setBusyId(null);
-    }
-  }
-
   async function confirmDelete() {
     if (!toDelete) return;
     setDeleting(true);
@@ -252,7 +218,6 @@ export default function Admin() {
 
   async function exportCsv() {
     const params = new URLSearchParams();
-    if (statusFilter) params.set('status', statusFilter);
     if (search) params.set('q', search);
     try {
       await api.download(
@@ -320,7 +285,7 @@ export default function Admin() {
             <p className="stat__label">всего ответов</p>
             <strong className="stat__value">{currentStats.total}</strong>
             <p className="stat__note">
-              {currentStats.unread > 0 ? `${currentStats.unread} новых` : 'все обработаны'}
+              все обработаны
             </p>
           </article>
           <article className="stat stat--sage">
@@ -366,26 +331,6 @@ export default function Admin() {
                 </button>
               )}
             </div>
-
-            <div className="segmented" role="group" aria-label="Фильтр по статусу">
-              {[
-                { key: '', label: 'все' },
-                { key: 'new', label: 'новые' },
-                { key: 'processed', label: 'обработанные' },
-              ].map((option) => (
-                <button
-                  type="button"
-                  key={option.key || 'all'}
-                  className={statusFilter === option.key ? 'is-active' : ''}
-                  onClick={() => {
-                    setStatusFilter(option.key);
-                    setPage(1);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {actionError && (
@@ -416,17 +361,16 @@ export default function Admin() {
               <span className="records__state-mark">Н</span>
               <p className="records__state-title">пока нет ответов</p>
               <p className="records__state-text">
-                {search || statusFilter
+                {search
                   ? 'По выбранным условиям ничего не найдено. Попробуйте изменить фильтр.'
                   : 'Как только гости заполнят анкету, их ответы появятся здесь.'}
               </p>
-              {(search || statusFilter) && (
+              {(search) && (
                 <button
                   type="button"
                   className="btn btn--ghost btn--small"
                   onClick={() => {
                     setQuery('');
-                    setStatusFilter('');
                   }}
                 >
                   сбросить фильтры
@@ -443,7 +387,6 @@ export default function Admin() {
                     <th>присутствие</th>
                     <th>детей</th>
                     <th>дата ответа</th>
-                    <th>статус</th>
                     <th aria-label="Действия" />
                   </tr>
                 </thead>
@@ -470,25 +413,6 @@ export default function Admin() {
                       </td>
                       <td data-label="Дата ответа">
                         <span className="record-date">{formatDate(record.createdAt)}</span>
-                      </td>
-                      <td data-label="Статус">
-                        <button
-                          type="button"
-                          className={`status-pill status-pill--${record.status}`}
-                          disabled={busyId === record.id}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            toggleStatus(record);
-                          }}
-                          title={
-                            record.status === 'new'
-                              ? 'Отметить как обработанную'
-                              : 'Вернуть в новые'
-                          }
-                        >
-                          <i />
-                          {record.status === 'new' ? 'новая' : 'обработана'}
-                        </button>
                       </td>
                       <td data-label="Действия">
                         <div className="row-actions">
@@ -576,10 +500,6 @@ export default function Admin() {
                   ? `${selected.children} ${pluralChildren(selected.children)}`
                   : 'без детей'}
               </span>
-              <span className={`status-pill status-pill--${selected.status}`}>
-                <i />
-                {selected.status === 'new' ? 'новая' : 'обработана'}
-              </span>
             </div>
             <dl className="modal__list">
               <div>
@@ -594,14 +514,6 @@ export default function Admin() {
               </div>
             </dl>
             <div className="modal__actions">
-              <button
-                type="button"
-                className="btn btn--ghost btn--small"
-                onClick={() => toggleStatus(selected)}
-                disabled={busyId === selected.id}
-              >
-                {selected.status === 'new' ? 'отметить обработанной' : 'вернуть в новые'}
-              </button>
               <button
                 type="button"
                 className="btn btn--danger btn--small"

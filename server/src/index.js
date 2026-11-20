@@ -6,7 +6,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { config } from './config.js';
-import { closePool } from './db.js';
+import { db } from './db.js';
 import { requireAuth } from './middleware/auth.js';
 import authRouter from './routes/auth.js';
 import rsvpRouter from './routes/rsvp.js';
@@ -108,12 +108,9 @@ const server = app.listen(config.port, () => {
 
 async function shutdown(signal) {
   console.log(`\n${signal}: останавливаем сервер…`);
-  server.close(async () => {
-    try {
-      await closePool();
-    } finally {
-      process.exit(0);
-    }
+  server.close(() => {
+    db.close();
+    process.exit(0);
   });
   setTimeout(() => process.exit(1), 10_000).unref();
 }

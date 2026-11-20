@@ -225,12 +225,14 @@ export default function Invitation() {
         <section className="section where" id="where">
           <div className="wrap where__grid">
             <div className="place" data-reveal>
-              <iframe
-                src="https://yandex.ru/map-widget/v1/?um=constructor%3A67cb8e593cfe9ea4410a75fc2773767ac68d0c15a144e02a3e09da4326ab5467&amp;source=constructor"
-                width="640"
-                height="440"
-                frameborder="0"
-              ></iframe>
+              <div className="place__map">
+                <iframe
+                  src="https://yandex.ru/map-widget/v1/?um=constructor%3A67cb8e593cfe9ea4410a75fc2773767ac68d0c15a144e02a3e09da4326ab5467&amp;source=constructor"
+                  width="100%"
+                  height="440"
+                  frameBorder="0"
+                ></iframe>
+              </div>
             </div>
 
             <div className="where__copy" data-reveal style={{ "--d": "0.1s" }}>

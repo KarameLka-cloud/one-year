@@ -1,22 +1,15 @@
 CREATE TABLE IF NOT EXISTS admins (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  login VARCHAR(64) NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  UNIQUE KEY uq_admins_login (login)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  login TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT (datetime('now'))
+);
 
 CREATE TABLE IF NOT EXISTS rsvps (
-  id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name VARCHAR(120) NOT NULL,
-  pair VARCHAR(120) NULL,
-  attendance ENUM('yes', 'no') NOT NULL DEFAULT 'yes',
-  children TINYINT UNSIGNED NOT NULL DEFAULT 0,
-  status ENUM('new', 'processed') NOT NULL DEFAULT 'new',
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (id),
-  KEY idx_rsvps_status (status),
-  KEY idx_rsvps_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  pair TEXT,
+  attendance TEXT NOT NULL DEFAULT 'yes' CHECK(attendance IN ('yes', 'no')),
+  children INTEGER NOT NULL DEFAULT 0 CHECK(children >= 0),
+  created_at DATETIME NOT NULL DEFAULT (datetime('now'))
+);
